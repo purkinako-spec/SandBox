@@ -1,0 +1,25 @@
+{
+  "unityPath": "C:/Program Files/Unity/Hub/Editor/2022.3.15f1/Editor/Unity.exe",
+  "projectPath": "./",
+  "buildTargets": [
+    {
+      "name": "Windows64",
+      "target": "standalonewindows64",
+      "scenes": ["Assets/MyActionGame/Scenes/NewScene.unity"],
+      "outputPath": "./Build/Windows64/MyActionGame.exe",
+      "options": ["none"]
+    },
+    {
+      "name": "Linux64",
+      "target": "standalonelinux64",
+      "scenes": ["Assets/MyActionGame/Scenes/NewScene.unity"],
+      "outputPath": "./Build/Linux64/MyActionGame.x86_64",
+      "options": ["none"]
+    }
+  ],
+  "testMode": "editmode",
+  "testResultsPath": "./TestResults/editmode-result.xml",
+  "preBuildMethod": "MyActionGame.BuildHooks.PreBuild",
+  "postBuildMethod": "MyActionGame.BuildHooks.PostBuild",
+  "logFile": "./UnityCLILoop.log"
+}

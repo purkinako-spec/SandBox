@@ -1,0 +1,63 @@
+name: Unity CI/CD with CLI Loop and AI Assistant
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        unity-version: [2022.3.15f1]  # あなたのプロジェクトと合わせる
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '6.0.x'
+      
+      - name: Install Unity CLI Loop
+        run: |
+          # リポジトリに同梱されているか、または公式から取得
+          # ここではサブモジュールまたはgit submoduleを想定
+          git submodule update --init --recursive
+          dotnet tool install --add-source ./unity-cli-loop/cli/nupkg Hatayama.UnityCliLoop
+      
+      - name: Setup Unity License
+        # Unityライセンスをシークレットから設定
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        run: |
+          echo "$UNITY_LICENSE" | base64 --decode > Unity_v${{ matrix.unity-version }}.ulf
+          mkdir -p ~/.local/share/unity3d/Unity
+          cp Unity_v${{ matrix.unity-version }}.ulf ~/.local/share/unity3d/Unity/Unity_lic.ulf
+      
+      - name: Run Unity CLI Loop (with AI Assistant integration)
+        env:
+          UNITY_PATH: /opt/unity/Hub/Editor/${{ matrix.unity-version }}/Editor/Unity
+          # AIアシスタントとの連携のための環境変数（例）
+          AI_ASSISTANT_MODE: "active"
+        run: |
+          unity-loop run --config unity-loop.json
+      
+      - name: Upload Build Artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: UnityBuilds-${{ matrix.unity-version }}
+          path: |
+            Build/
+            TestResults/
+            UnityCLILoop.log
+      
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: TestResults-${{ matrix.unity-version }}
+          path: TestResults/
