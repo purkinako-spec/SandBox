@@ -8,6 +8,11 @@ namespace LiminalSpace
         [SerializeField] protected GameObject targetObject2;
         public override bool Generate()
         {
+            if (prefabCatalog == null)
+            {
+                Debug.LogError("PrefabCatalog is not loaded. Cannot generate.");
+                return false;
+            }
             if (ObjectCheck())
             {
                 return false;

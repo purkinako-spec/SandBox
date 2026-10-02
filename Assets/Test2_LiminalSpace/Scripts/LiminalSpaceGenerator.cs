@@ -21,6 +21,11 @@ namespace LiminalSpace
         [SerializeField] private GameObject targetObject;
         public virtual bool Generate()
         {
+            if (prefabCatalog == null)
+            {
+                Debug.LogError("PrefabCatalog is not loaded. Cannot generate.");
+                return false;
+            }
             if (ObjectCheck())
             {
                 return false;
