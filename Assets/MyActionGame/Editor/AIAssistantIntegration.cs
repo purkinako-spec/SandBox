@@ -57,6 +57,18 @@ namespace MyActionGame
                     }
                     break;
                     
+                case "AdjustPlayerJumpHeight":
+                    if (parameters.TryGetValue("jumpHeight", out var jumpHeightObj) && jumpHeightObj is float jumpHeight)
+                    {
+                        var controllers = Object.FindObjectsOfType<MyActionGame.PlayerController>();
+                        foreach (var controller in controllers)
+                        {
+                            controller.jumpHeight = jumpHeight;
+                        }
+                        Debug.Log($"AIアシスタント提案適用: Playerジャンプ高さを{jumpHeight}に調整");
+                    }
+                    break;
+                    
                 default:
                     Debug.Log($"未知のAIアシスタント提案タイプ: {suggestionType}");
                     break;
