@@ -8,15 +8,19 @@ namespace LiminalSpace
         [SerializeField] protected GameObject targetObject2;
         public override bool Generate()
         {
-            GameObject prefabToSpawn1;
-            GameObject prefabToSpawn2;
-
-            prefabToSpawn1 = prefabCatalog.GetRandomPrefab();
-            prefabToSpawn2 = prefabCatalog.GetRandomPrefab();
-
+            if (ObjectCheck())
+            {
+                return false;
+            }
+            GameObject prefabToSpawn1 = prefabCatalog.GetRandomPrefab();
+            GameObject prefabToSpawn2 = prefabCatalog.GetRandomPrefab();
+            if (prefabToSpawn1 == null || prefabToSpawn2 == null)
+            {
+                Debug.LogError("PrefabCatalog returned null prefab.");
+                return false;
+            }
             Instantiate(prefabToSpawn1, targetObject1.transform.position, Quaternion.identity);
             Instantiate(prefabToSpawn2, targetObject2.transform.position, Quaternion.identity);
-
             return true;
         }
 

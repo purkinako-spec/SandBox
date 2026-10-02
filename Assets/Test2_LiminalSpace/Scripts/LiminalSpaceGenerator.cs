@@ -21,10 +21,17 @@ namespace LiminalSpace
         [SerializeField] private GameObject targetObject;
         public virtual bool Generate()
         {
+            if (ObjectCheck())
+            {
+                return false;
+            }
             GameObject prefabToSpawn = prefabCatalog.GetRandomPrefab();
-
+            if (prefabToSpawn == null)
+            {
+                Debug.LogError("PrefabCatalog returned null prefab.");
+                return false;
+            }
             Instantiate(prefabToSpawn, targetObject.transform.position, Quaternion.identity);
-
             return true;
         }
 
