@@ -15,7 +15,7 @@ namespace LiminalSpace
             prefabToSpawn2 = prefabCatalog.GetRandomPrefab();
 
             Instantiate(prefabToSpawn1, targetObject1.transform.position, Quaternion.identity);
-            Instantiate(prefabToSpawn1, targetObject2.transform.position, Quaternion.identity);
+            Instantiate(prefabToSpawn2, targetObject2.transform.position, Quaternion.identity);
 
             return true;
         }
