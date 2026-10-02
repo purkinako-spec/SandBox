@@ -44,6 +44,11 @@ namespace LiminalSpace
         [SerializeField] protected float checkDistance = 0.6f;
         protected virtual bool ObjectCheck()
         {
+            if (targetObject == null)
+            {
+                Debug.LogError("targetObject is not assigned in LiminalSpaceGenerator.");
+                return true; // treat as occupied to avoid spawning
+            }
             return Physics.CheckSphere(targetObject.transform.position, checkRadius);
         }
     }

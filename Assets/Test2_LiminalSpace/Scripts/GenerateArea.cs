@@ -6,7 +6,15 @@ namespace LiminalSpace
     {
         private void OnTriggerEnter(Collider other)
         {
-            GetComponent<AreaManager>().Generate();
+            var areaManager = FindObjectOfType<AreaManager>();
+            if (areaManager != null)
+            {
+                areaManager.Generate();
+            }
+            else
+            {
+                Debug.LogError("AreaManager not found in scene. Ensure there is an AreaManager component active.");
+            }
         }
     }
 }

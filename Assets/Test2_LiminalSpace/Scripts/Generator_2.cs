@@ -31,12 +31,15 @@ namespace LiminalSpace
 
         protected override bool ObjectCheck()
         {
+            if (targetObject1 == null || targetObject2 == null)
+            {
+                Debug.LogError("targetObject1 or targetObject2 is not assigned in Generator_2.");
+                return true; // treat as occupied
+            }
             return (
-                Physics.CheckSphere(
-                targetObject1.transform.position, checkRadius)
+                Physics.CheckSphere(targetObject1.transform.position, checkRadius)
                 ||
-                Physics.CheckSphere(
-                targetObject2.transform.position, checkRadius));
+                Physics.CheckSphere(targetObject2.transform.position, checkRadius));
         }
     }
 }
