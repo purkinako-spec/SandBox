@@ -15,5 +15,13 @@ namespace MyActionGame.NewAction
         {
             
         }
+
+        /// <summary>
+        /// アクションを実行するメソッド
+        /// </summary>
+        public void PerformAction()
+        {
+            Debug.Log($"{name} がアクションを実行しました！");
+        }
     }
 }
