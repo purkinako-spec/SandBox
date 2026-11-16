@@ -1,0 +1,205 @@
+// Unity Noita-Style Pixel Physics Engine
+// FallingSandCompute.compute
+#pragma kernel CSCopy
+#pragma kernel CSMain
+#pragma kernel CSDrawCircle
+#pragma kernel CSExplode
+
+struct PixelData
+{
+    uint material;
+    uint age;
+    uint flags;
+    uint padding;
+};
+
+// Buffers
+StructuredBuffer<PixelData> _ReadBuffer;
+RWStructuredBuffer<PixelData> _WriteBuffer;
+RWStructuredBuffer<uint> _DirtyChunks;
+
+// Uniforms
+int _GridWidth;
+int _GridHeight;
+int _FrameCount;
+int _CheckerboardPhase;
+float _Gravity;
+float _BurnSpeed;
+
+// Brush & Explosion Uniforms
+int _BrushCX;
+int _BrushCY;
+int _BrushRadius;
+int _BrushMaterial;
+
+int _ExplodeCX;
+int _ExplodeCY;
+int _ExplodeRadius;
+float _ExplodePower;
+
+// Material IDs
+#define MAT_AIR 0
+#define MAT_SAND 1
+#define MAT_WATER 2
+#define MAT_GUNPOWDER 3
+#define MAT_FIRE 4
+#define MAT_ACID 5
+#define MAT_LAVA 6
+#define MAT_OIL 7
+#define MAT_WOOD 8
+#define MAT_STONE 9
+#define MAT_SMOKE 10
+#define MAT_STEAM 11
+#define MAT_TNT 12
+
+inline int GetIndex(int x, int y)
+{
+    return y * _GridWidth + x;
+}
+
+[numthreads(8, 8, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID)
+{
+    int x = (int)id.x * 2 + (_CheckerboardPhase % 2);
+    int y = (int)id.y * 2 + (_CheckerboardPhase / 2);
+
+    int totalPixels = _GridWidth * _GridHeight;
+    if (x < 0 || x >= _GridWidth || y < 0 || y >= _GridHeight) return;
+
+    int idx = GetIndex(x, y);
+    if (idx < 0 || idx >= totalPixels) return;
+
+    PixelData cur = _ReadBuffer[idx];
+    if (cur.material == MAT_AIR) return;
+
+    int altDir = (_FrameCount % 2 == 0) ? 1 : -1;
+
+    // --- Falling Solids (Sand, Gunpowder) ---
+    if (cur.material == MAT_SAND || cur.material == MAT_GUNPOWDER)
+    {
+        if (y + 1 < _GridHeight)
+        {
+            int downIdx = GetIndex(x, y + 1);
+            if (downIdx >= 0 && downIdx < totalPixels)
+            {
+                PixelData down = _ReadBuffer[downIdx];
+                if (down.material == MAT_AIR || down.material == MAT_WATER || down.material == MAT_OIL)
+                {
+                    _WriteBuffer[downIdx] = cur;
+                    _WriteBuffer[idx] = down;
+                    return;
+                }
+            }
+
+            int diagX = x + altDir;
+            if (diagX >= 0 && diagX < _GridWidth)
+            {
+                int diagIdx = GetIndex(diagX, y + 1);
+                if (diagIdx >= 0 && diagIdx < totalPixels)
+                {
+                    PixelData diag = _ReadBuffer[diagIdx];
+                    if (diag.material == MAT_AIR || diag.material == MAT_WATER)
+                    {
+                        _WriteBuffer[diagIdx] = cur;
+                        _WriteBuffer[idx] = diag;
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    // --- Liquids (Water, Acid, Lava, Oil) ---
+    if (cur.material == MAT_WATER || cur.material == MAT_ACID || cur.material == MAT_LAVA || cur.material == MAT_OIL)
+    {
+        if (y + 1 < _GridHeight)
+        {
+            int downIdx = GetIndex(x, y + 1);
+            if (downIdx >= 0 && downIdx < totalPixels)
+            {
+                if (_ReadBuffer[downIdx].material == MAT_AIR)
+                {
+                    _WriteBuffer[downIdx] = cur;
+                    _WriteBuffer[idx] = _ReadBuffer[downIdx];
+                    return;
+                }
+            }
+        }
+
+        int sideX = x + altDir;
+        if (sideX >= 0 && sideX < _GridWidth)
+        {
+            int sideIdx = GetIndex(sideX, y);
+            if (sideIdx >= 0 && sideIdx < totalPixels)
+            {
+                if (_ReadBuffer[sideIdx].material == MAT_AIR)
+                {
+                    _WriteBuffer[sideIdx] = cur;
+                    _WriteBuffer[idx] = _ReadBuffer[sideIdx];
+                    return;
+                }
+            }
+        }
+    }
+}
+
+[numthreads(8, 8, 1)]
+void CSDrawCircle(uint3 id : SV_DispatchThreadID)
+{
+    int x = (int)_BrushCX - (int)_BrushRadius + (int)id.x;
+    int y = (int)_BrushCY - (int)_BrushRadius + (int)id.y;
+
+    int totalPixels = _GridWidth * _GridHeight;
+    if (x < 0 || x >= _GridWidth || y < 0 || y >= _GridHeight) return;
+    int idx = GetIndex(x, y);
+    if (idx < 0 || idx >= totalPixels) return;
+
+    int dx = x - _BrushCX;
+    int dy = y - _BrushCY;
+    if (dx * dx + dy * dy <= _BrushRadius * _BrushRadius)
+    {
+        PixelData p;
+        p.material = _BrushMaterial;
+        p.age = 0;
+        p.flags = 0;
+        p.padding = 0;
+        _WriteBuffer[idx] = p;
+    }
+}
+
+[numthreads(8, 8, 1)]
+void CSExplode(uint3 id : SV_DispatchThreadID)
+{
+    int x = (int)_ExplodeCX - (int)_ExplodeRadius + (int)id.x;
+    int y = (int)_ExplodeCY - (int)_ExplodeRadius + (int)id.y;
+
+    int totalPixels = _GridWidth * _GridHeight;
+    if (x < 0 || x >= _GridWidth || y < 0 || y >= _GridHeight) return;
+    int idx = GetIndex(x, y);
+    if (idx < 0 || idx >= totalPixels) return;
+
+    int dx = x - _ExplodeCX;
+    int dy = y - _ExplodeCY;
+    int dist2 = dx * dx + dy * dy;
+    int r2 = _ExplodeRadius * _ExplodeRadius;
+
+    if (dist2 <= r2)
+    {
+        PixelData p;
+        p.material = (dist2 < r2 * 0.45) ? MAT_AIR : MAT_FIRE;
+        p.age = 0;
+        p.flags = 0;
+        p.padding = 0;
+        _WriteBuffer[idx] = p;
+    }
+}
+
+[numthreads(8, 8, 1)]
+void CSCopy(uint3 id : SV_DispatchThreadID)
+{
+    int x = (int)id.x;
+    int y = (int)id.y;
+    if (x >= _GridWidth || y >= _GridHeight) return;
+    int idx = GetIndex(x, y);
+    _WriteBuffer[idx] = _ReadBuffer[idx];
+}

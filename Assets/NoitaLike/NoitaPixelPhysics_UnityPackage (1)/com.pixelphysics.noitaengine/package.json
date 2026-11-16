@@ -1,0 +1,25 @@
+{
+  "name": "com.pixelphysics.noitaengine",
+  "version": "1.0.0",
+  "displayName": "Noita-Style Pixel Physics Engine",
+  "description": "High-performance cellular automata pixel physics engine for Unity with GPU Compute Shader & CPU fallback, UDP low-latency netcode, and profiling suite.",
+  "unity": "2022.3",
+  "keywords": [
+    "falling-sand",
+    "cellular-automata",
+    "noita",
+    "compute-shader",
+    "physics",
+    "multiplayer",
+    "udp"
+  ],
+  "author": {
+    "name": "Pixel Physics Team",
+    "url": "https://github.com"
+  },
+  "dependencies": {
+    "com.unity.burst": "1.8.12",
+    "com.unity.mathematics": "1.2.6",
+    "com.unity.collections": "2.1.4"
+  }
+}
