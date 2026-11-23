@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "com.custom.drawing-system": {
-      "version": "file:D:/UnityDrawingSystem",
+      "version": "file:C:/Users/G2546/Documents/GitHub/UnityDrawingSystem",
       "depth": 0,
       "source": "local",
       "dependencies": {}
