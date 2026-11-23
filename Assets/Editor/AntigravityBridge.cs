@@ -503,6 +503,13 @@ namespace Antigravity.Bridge
                     return $"{{\"success\":true,\"selected\":\"{EscapeJson(go.name)}\"}}";
                 }
 
+                case "execute_menu":
+                {
+                    if (string.IsNullOrEmpty(payload.target)) return "{\"success\":false,\"error\":\"No menu item target specified\"}";
+                    bool executed = EditorApplication.ExecuteMenuItem(payload.target);
+                    return $"{{\"success\":{executed.ToString().ToLowerInvariant()},\"menu\":\"{EscapeJson(payload.target)}\"}}";
+                }
+
                 case "get_logs":
                 {
                     var sb = new StringBuilder();
