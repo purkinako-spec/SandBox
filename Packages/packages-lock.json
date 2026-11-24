@@ -4,7 +4,10 @@
       "version": "file:C:/Users/G2546/Documents/GitHub/UnityDrawingSystem",
       "depth": 0,
       "source": "local",
-      "dependencies": {}
+      "dependencies": {
+        "com.unity.inputsystem": "1.7.0",
+        "com.unity.ugui": "2.0.0"
+      }
     },
     "com.unity.2d.animation": {
       "version": "10.2.2",
