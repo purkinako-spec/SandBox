@@ -493,6 +493,13 @@ namespace Antigravity.Bridge
                     return $"{{\"success\":true,\"isPlaying\":{(EditorApplication.isPlaying ? "true" : "false")}}}";
                 }
 
+                case "request_recompile":
+                {
+                    UnityEditor.Compilation.CompilationPipeline.RequestScriptCompilation();
+                    AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate);
+                    return "{\"success\":true}";
+                }
+
                 case "select_object":
                 {
                     GameObject go = FindTarget(payload.target);
